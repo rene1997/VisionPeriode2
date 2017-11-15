@@ -1,18 +1,26 @@
 #include <opencv2\opencv.hpp>
 #include <iostream>
 
+using namespace cv;
 using namespace std;
 
 int runOpdracht2();
+int allContours(Mat image, vector < vector<Point>> & countourVecVec);
 
 int main() {
-	runOpdracht2();
+	return runOpdracht2();
 }
 
 
 int runOpdracht2() {
-
-
-
-	return 0;
+	Mat image = imread("monsters.jpg");
+	namedWindow("image", WINDOW_NORMAL);
+	imshow("image", image);
+	vector<vector<Point>> contourVecVec;
+	allContours(image, contourVecVec);
+	
+	waitKey(0);
+		return 0;
 }
+
+int allContours(Mat binaryImage, vector< vector<Point> > & contourVecVec) {	Mat greyImage, treshold;	cvtColor(binaryImage, greyImage, CV_BGR2GRAY);	return 0;}

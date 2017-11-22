@@ -15,16 +15,15 @@ int clockWiseSize = 9;
 
 
 int main() {
-	return runOpdracht2();
-	//return runOpdracht3();
+	//return runOpdracht2();
+	return runOpdracht3();
 }
 
 int allContours(Mat binaryImage, vector<vector<Point>> & contourVecVec) {
-	
+	Mat mat16s, labeled;
 	vector<Point2d*> startPoints, posVec;
 	vector<int> areaVec;
 
-	Mat mat16s, labeled;
 	binaryImage.convertTo(mat16s, CV_16S);
 	int blob2Amount = labelBLOBsInfo(mat16s, labeled, startPoints, posVec, areaVec);
 	Mat mooreBoundary = binaryImage.clone();
@@ -73,19 +72,11 @@ int runOpdracht2() {
 		return -1;
 	}
 
-	//imshow("Original image", image);
 	Mat dst, cdst, gray_image, mat16s, treshold_image;
 	cvtColor(image, gray_image, CV_BGR2GRAY);
-
 	
-	//imshow("gray image", gray_image);
-
 	GaussianBlur(gray_image, treshold_image, Size(7, 7), 0, 0);
 	threshold(treshold_image, treshold_image, 50, 1, THRESH_BINARY_INV);
-	//
-	//imshow("Treshold", mat16s);
-
-	//imwrite("test.bmp", mat16s);
 
 	vector<vector<Point>> contourVector;
 	allContours(treshold_image, contourVector);
@@ -93,7 +84,67 @@ int runOpdracht2() {
 		return 0;
 }
 
+void makeGrid(vector<Point> & contour, vector<Point> & newContour, int scale, Mat & image) {
+	int x = 0;
+	int y = 0;
+	Mat testImage = image.clone();
+	testImage = 0;
+	for (int i = 0; i < contour.size(); i++) {
+		x += contour[i].x;
+		y += contour[i].y;
+		if (i == contour.size() - 1 && contour.size() % scale > scale / 2) {
+			scale = contour.size() % scale;
+		}
+		if ((i+1) % scale == 0 || (i == contour.size() -1 && contour.size() % scale > scale /2)) {
+			
+			int avgX = abs(x / scale);
+			int avgY = abs(y / scale);
+			newContour.push_back({ avgX,avgY });
+			testImage.at<uchar>(avgY, avgX) = 255;
+			x = y = 0;
+		}
+	}
+	imshow("tesplaatje", testImage);
+	return;
+}
+
+double bendingEnergy(Mat binaryImage, vector<Point> & contourvec) {
+	double energy = 0;
+	int direction = 0;
+	for (int i = 0; i < contourvec.size(); i++) {
+		Point current = contourvec[i];
+		Point next; 
+		if (i == contourvec.size() - 1) next = contourvec[0];
+		else contourvec[i + 1];
+
+		int difX = current.x - next.x;
+		int difY = current.y - next.y;
+
+
+	}
+	return energy;
+}
 
 int runOpdracht3() {
+	Mat image = imread("monsters.jpg", CV_LOAD_IMAGE_COLOR);
+	if (!image.data)
+	{
+		cout << "Could not open or find the image" << std::endl;
+		return -1;
+	}
+
+	Mat dst, cdst, gray_image, mat16s, treshold_image;
+	cvtColor(image, gray_image, CV_BGR2GRAY);
+
+	GaussianBlur(gray_image, treshold_image, Size(7, 7), 0, 0);
+	threshold(treshold_image, treshold_image, 50, 1, THRESH_BINARY_INV);
+
+	vector<vector<Point>> contourVector;
+	allContours(treshold_image, contourVector);
+	vector<Point> scaledContour;
+	
+	makeGrid(contourVector[0], scaledContour, 10, treshold_image);
+	bendingEnergy(treshold_image, scaledContour);
+	waitKey(0);
 	return 0;
 }

@@ -1,5 +1,6 @@
 #include <opencv2\opencv.hpp>
 #include <iostream>
+#include "avansvisionlib.h"
 
 using namespace cv;
 using namespace std;
@@ -19,70 +20,46 @@ int main() {
 }
 
 int allContours(Mat binaryImage, vector<vector<Point>> & contourVecVec) {
+	
+	vector<Point2d*> startPoints, posVec;
+	vector<int> areaVec;
+
+	Mat mat16s, labeled;
+	binaryImage.convertTo(mat16s, CV_16S);
+	int blob2Amount = labelBLOBsInfo(mat16s, labeled, startPoints, posVec, areaVec);
 	Mat mooreBoundary = binaryImage.clone();
 	mooreBoundary = 0;
 
-	
-	
-	for (int i = 0;i < binaryImage.rows; i++)
+	for (int i = 0;i < startPoints.size(); i++)
 	{
-		for (int j = 0; j < binaryImage.cols; j++)
-		{
-			//mooreBoundary.at<uchar>(i, j) = 0;
-			if (binaryImage.at<uchar>(i, j) == 0 /*&& not in earlier object*/)
-			{
-				auto osdif = binaryImage.at<uchar>(i, j);
-				cout << "waarom komt hier nisk uit " << binaryImage.at<uchar>(i, j);
-				vector<Point> points;
-				Point firstPoint;
-				firstPoint.x = j;
-				firstPoint.y = i;
-				points.push_back(firstPoint);
-				int x = j, y = i;
-				//bool edge = false;
-				while (((firstPoint.x != points[points.size() -1].x) || (firstPoint.y != points[points.size() -1].y)) || (points.size() <= 1)) {
-					int lastY = points[points.size() - 1].y;
-					int lastX = points[points.size() - 1].x;
-					if (firstPoint.y == lastY) {
-						if (firstPoint.x == lastX) {
-							cout << "zou gestopt moeten zijn" << endl;
-						}
-					}
-					//mooreBoundary.at<uchar>(i, j) = 255;
-					bool added = false;
-					int edge = 0;
-					bool found = false;
-					for (int c = 0; c < clockWiseSize; c++) {
-						int testx = x + clockWiseX[c];
-						int testy = y + clockWiseY[c];
-						int value = binaryImage.at<uchar>((y + clockWiseY[c]), (x + clockWiseX[c]));
-						int valuetest = binaryImage.at<uchar>(20,106);
-						if ((binaryImage.at<uchar>((y + clockWiseY[c]), (x + clockWiseX[c])) != 0))
-						{
-							edge++;
-						}
-						else if (edge>1 && !added)
-						{
-							Point point;
-							x += clockWiseX[c];
-							y += clockWiseY[c];
-							point.x = x;
-							point.y = y;
-							points.push_back(point);
-							added = true;
-							found = true;
-							mooreBoundary.at<uchar>(y, x)=255;
-						}
-						if (!found && c == clockWiseSize-1) { c = 0; };
-					}
-
-					
+		int x = startPoints[i]->y, y = startPoints[i]->x;
+		vector<Point> points;
+		Point firstPoint = { x,y };
+		points.push_back(firstPoint);
+		
+		while (((firstPoint.x != points[points.size() -1].x) || (firstPoint.y != points[points.size() -1].y)) || (points.size() <= 1)) {
+			bool added = false;
+			int edge = 0;
+			for (int c = 0; c < clockWiseSize; c++) {				
+				if ((binaryImage.at<uchar>((y + clockWiseY[c]), (x + clockWiseX[c])) == 0))
+				{
+					edge++;
 				}
-				imshow("test deze", mooreBoundary);
-				return -1;
-				cout << "first object found " << points.size() << endl;
+				else if (edge>1 && !added)
+				{
+					x += clockWiseX[c];
+					y += clockWiseY[c];
+					Point point = {x,y};
+					points.push_back(point);
+					added = true;
+					mooreBoundary.at<uchar>(y, x)=255;
+				}
+				if (!added && c == clockWiseSize-1) { c = 0; };
 			}
 		}
+		imshow("test", mooreBoundary);
+		cout << "first object found " << points.size() << endl;
+		contourVecVec.push_back(points);
 	}
 	return -1;
 }
@@ -96,18 +73,19 @@ int runOpdracht2() {
 		return -1;
 	}
 
-	imshow("Original image", image);
-	Mat dst, cdst, gray_image, treshold_image;
+	//imshow("Original image", image);
+	Mat dst, cdst, gray_image, mat16s, treshold_image;
 	cvtColor(image, gray_image, CV_BGR2GRAY);
 
-	imshow("gray image", gray_image);
+	
+	//imshow("gray image", gray_image);
 
 	GaussianBlur(gray_image, treshold_image, Size(7, 7), 0, 0);
-	threshold(treshold_image, treshold_image, 50, 255, THRESH_BINARY);
+	threshold(treshold_image, treshold_image, 50, 1, THRESH_BINARY_INV);
+	//
+	//imshow("Treshold", mat16s);
 
-	imshow("Teshold", treshold_image);
-
-	imwrite("test.bmp",treshold_image);
+	//imwrite("test.bmp", mat16s);
 
 	vector<vector<Point>> contourVector;
 	allContours(treshold_image, contourVector);

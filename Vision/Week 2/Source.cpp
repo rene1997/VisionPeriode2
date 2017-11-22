@@ -110,17 +110,21 @@ void makeGrid(vector<Point> & contour, vector<Point> & newContour, int scale, Ma
 
 double bendingEnergy(Mat binaryImage, vector<Point> & contourvec) {
 	double energy = 0;
-	int direction = 0;
+	double direction = 0;
 	for (int i = 0; i < contourvec.size(); i++) {
 		Point current = contourvec[i];
 		Point next; 
 		if (i == contourvec.size() - 1) next = contourvec[0];
-		else contourvec[i + 1];
+		else next = contourvec[i + 1];
 
 		int difX = current.x - next.x;
 		int difY = current.y - next.y;
-
-
+		
+		double currentDir;
+		if (difY == 0) currentDir = 0;
+		else currentDir = fabs(difX / difY);
+		energy += fabs(currentDir - direction);
+		direction = currentDir;
 	}
 	return energy;
 }
@@ -141,10 +145,13 @@ int runOpdracht3() {
 
 	vector<vector<Point>> contourVector;
 	allContours(treshold_image, contourVector);
-	vector<Point> scaledContour;
+	vector<Point> scaledContour, s2;
 	
 	makeGrid(contourVector[0], scaledContour, 10, treshold_image);
-	bendingEnergy(treshold_image, scaledContour);
+	double monster1 = bendingEnergy(treshold_image, scaledContour);
+	
+	makeGrid(contourVector[1], s2, 10, treshold_image);
+	double monster2 = bendingEnergy(treshold_image, s2);
 	waitKey(0);
 	return 0;
 }

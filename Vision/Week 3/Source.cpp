@@ -1,6 +1,7 @@
 #include <opencv2\opencv.hpp>
 #include <iostream>
 #include "avansvisionlib.h"
+#include "sstream"
 
 using namespace cv;
 using namespace std;
@@ -19,7 +20,7 @@ int main() {
 }
 
 int runOpdracht2() {
-	Mat image = imread("monsters.jpg", CV_LOAD_IMAGE_COLOR);
+	Mat image = imread("8objecten.png", CV_LOAD_IMAGE_COLOR);
 	if (!image.data)
 	{
 		cout << "Could not open or find the image" << std::endl;
@@ -30,9 +31,10 @@ int runOpdracht2() {
 	cvtColor(image, gray_image, CV_BGR2GRAY);
 	//bluring image
 	GaussianBlur(gray_image, blur, Size(7, 7), 0, 0);
+	imshow("test", blur);
 	threshold(blur, treshold_image, 50, 1, THRESH_BINARY_INV);
 	threshold(blur, treshold_2, 50, 255, THRESH_BINARY_INV);
-	imshow("source image", treshold_image);
+	//imshow("source image", treshold_image);
 
 	vector<vector<Point>> contourVector, bbs;
 	//find all contours
@@ -75,7 +77,12 @@ int allBoundingBoxes(const vector<vector<Point>> & contours, vector <vector<Poin
 			treshold.at<uchar>({ minX,j}) = 255;
 			treshold.at<uchar>({ maxX,j }) = 255;
 		}
-		//imshow("bbs", treshold);
+		stringstream s;
+		s << "8obj" << i << ".bmp";
+		Mat roiMap;
+		roiMap= treshold(Rect(minX, minY, (maxX - minX), (maxY - minY)));
+		imwrite(s.str(), roiMap);
+
 		bbs.push_back(currentBox);
 			
 		

@@ -18,9 +18,18 @@
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Week 2\avansvisionlib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="contours.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Countours.h">
+    <ClInclude Include="..\Week 2\avansvisionlib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contours.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

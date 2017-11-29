@@ -19,10 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Week 2\avansvisionlib.cpp" />
+    <ClCompile Include="contours.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Countours.h" />
+    <ClInclude Include="..\Week 2\avansvisionlib.h" />
+    <ClInclude Include="contours.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

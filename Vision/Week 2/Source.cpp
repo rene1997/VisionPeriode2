@@ -57,7 +57,7 @@ int allContours(Mat binaryImage, vector<vector<Point>> & contourVecVec) {
 			}
 		}
 		imshow("test", mooreBoundary);
-		cout << "first object found " << points.size() << endl;
+		cout << "contour with " << points.size() << " points found" << endl;
 		contourVecVec.push_back(points);
 	}
 	return -1;
@@ -76,7 +76,8 @@ int runOpdracht2() {
 	cvtColor(image, gray_image, CV_BGR2GRAY);
 	
 	GaussianBlur(gray_image, treshold_image, Size(7, 7), 0, 0);
-	threshold(treshold_image, treshold_image, 50, 1, THRESH_BINARY_INV);
+	threshold(treshold_image, treshold_image, 50, 255, THRESH_BINARY_INV);
+	imshow("source image", treshold_image);
 
 	vector<vector<Point>> contourVector;
 	allContours(treshold_image, contourVector);
@@ -104,7 +105,7 @@ void makeGrid(vector<Point> & contour, vector<Point> & newContour, int scale, Ma
 			x = y = 0;
 		}
 	}
-	imshow("tesplaatje", testImage);
+	imshow("grid test image", testImage);
 	return;
 }
 
@@ -142,6 +143,7 @@ int runOpdracht3() {
 
 	GaussianBlur(gray_image, treshold_image, Size(7, 7), 0, 0);
 	threshold(treshold_image, treshold_image, 50, 1, THRESH_BINARY_INV);
+	imshow("source image", gray_image);
 
 	vector<vector<Point>> contourVector;
 	allContours(treshold_image, contourVector);
@@ -149,9 +151,11 @@ int runOpdracht3() {
 	
 	makeGrid(contourVector[0], scaledContour, 10, treshold_image);
 	double monster1 = bendingEnergy(treshold_image, scaledContour);
+	cout << "Bending energy first object: " << monster1 << endl;
 	
 	makeGrid(contourVector[1], s2, 10, treshold_image);
 	double monster2 = bendingEnergy(treshold_image, s2);
+	cout << "Bending energy second object: " << monster2 << endl;
 	waitKey(0);
 	return 0;
 }

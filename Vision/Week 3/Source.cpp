@@ -3,6 +3,7 @@
 #include "avansvisionlib.h"
 #include "sstream"
 #include "contours.h"
+#include <stack>
 
 using namespace cv;
 using namespace std;
@@ -98,17 +99,27 @@ Point fourConnected[] = { {-1,0},{0,-1}, {1,0}, {0,1}};
 
 int addSurroundPixels(vector<Point> & regionPixels, Point & checkPoint) 
 {
-	for (Point p : fourConnected) {
-		Point newPoint = checkPoint + p;
-		bool found = false;
-		for (Point contourPoint : regionPixels) {
-			if (newPoint == contourPoint) {
-				found = true;
+	stack<Point> st;
+	st.push(checkPoint);
+	regionPixels.push_back(checkPoint);
+	Point cp = checkPoint;
+
+	while (st.size() > 0) {
+		cp = st.top();
+		st.pop();
+		for (Point p : fourConnected) {
+			Point newPoint = cp + p;
+			bool foundContour = false;
+			for (Point contourPoint : regionPixels) {
+				if (newPoint == contourPoint) {
+					foundContour = true;
+					break;
+				}
 			}
-		}
-		if (!found && regionPixels.size() < 2000) {
-			regionPixels.push_back(newPoint);
-			addSurroundPixels(regionPixels, newPoint);
+			if (!foundContour) {
+				st.push(newPoint);
+				regionPixels.push_back(newPoint);
+			}
 		}
 	}
 	return 1;
@@ -123,6 +134,8 @@ int enclosedPixels(const vector<Point> & contourVec, vector<Point> & regionPixel
 		}
 	}
 	Point startpoint = { minY.x, minY.y + 1 };
+
+
 	addSurroundPixels(regionPixels, startpoint);
 	Mat test = Mat(500,500, CV_64F);
 	test = 0;

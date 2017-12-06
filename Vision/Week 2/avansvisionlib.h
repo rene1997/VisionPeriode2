@@ -1,3 +1,9 @@
+#pragma once
+
+#ifndef AVANSLIB_H
+#define AVANSLIB_H
+
+
 // avansvisionlib - Growing Visionlibrary of Avans based on OpenCV 2.4.10 
 // Goal: deep understanding of vision algorithms by means of developing own (new) algorithms.
 // 
@@ -231,3 +237,6 @@ int labelBLOBsInfo(Mat binaryImage, Mat & labeledImage,
 	vector<Point2d *> & firstpixelVec, vector<Point2d *> & posVec,
 	vector<int> & areaVec,
 	int threshAreaMin = 1, int threshAreaMax = INT_MAX);
+
+
+#endif // !AVANSLIB_H

@@ -15,16 +15,18 @@ double bendingEnergy(Mat binaryImage, vector<Point> & contourvec);
 
 int runOpdracht2();
 int runOpdracht3();
+int runOpdracht3c();
 
 int allBoundingBoxes(const vector<vector<Point>> & contours, vector < vector<Point>> & bbs, Mat treshold);
 
 int main() {
 	//return runOpdracht2();
-	return runOpdracht3();
+	//return runOpdracht3();
+	return runOpdracht3c();
 }
 
 int runOpdracht2() {
-	Mat image = imread("8objecten.png", CV_LOAD_IMAGE_COLOR);
+	Mat image = imread("monsters.jpg", CV_LOAD_IMAGE_COLOR);
 	if (!image.data)
 	{
 		cout << "Could not open or find the image" << std::endl;
@@ -97,18 +99,22 @@ int allBoundingBoxes(const vector<vector<Point>> & contours, vector <vector<Poin
 
 Point fourConnected[] = { {-1,0},{0,-1}, {1,0}, {0,1}};
 
-int addSurroundPixels(vector<Point> & regionPixels, Point & checkPoint) 
+int enclosePixel(vector<Point> & regionPixels, Point & checkPoint) 
 {
+	//list with picels to check
 	stack<Point> st;
 	st.push(checkPoint);
 	regionPixels.push_back(checkPoint);
 	Point cp = checkPoint;
 
+	//while there are pixels to check
 	while (st.size() > 0) {
+		//take and remove first pixel
 		cp = st.top();
 		st.pop();
 		for (Point p : fourConnected) {
 			Point newPoint = cp + p;
+			//check if new neighbour is contour
 			bool foundContour = false;
 			for (Point contourPoint : regionPixels) {
 				if (newPoint == contourPoint) {
@@ -116,6 +122,7 @@ int addSurroundPixels(vector<Point> & regionPixels, Point & checkPoint)
 					break;
 				}
 			}
+			//if not add to todopixesl
 			if (!foundContour) {
 				st.push(newPoint);
 				regionPixels.push_back(newPoint);
@@ -133,24 +140,26 @@ int enclosedPixels(const vector<Point> & contourVec, vector<Point> & regionPixel
 			minY = point;
 		}
 	}
-	Point startpoint = { minY.x, minY.y + 1 };
+	Point startpoint = { minY.x +1, minY.y + 10 };
+	
+	//fill contour
+	enclosePixel(regionPixels, startpoint);
 
-
-	addSurroundPixels(regionPixels, startpoint);
-	Mat test = Mat(500,500, CV_64F);
-	test = 0;
-	for (Point point: regionPixels)
-	{
-		cout << "";
-		test.at<double>(point.y,point.x) = 255;
-	}
-	imshow("test", test);
+	//draw image for testing
+	//Mat test = Mat(500,500, CV_64F);
+	//test = 0;
+	//for (Point point: regionPixels)
+	//{
+	//	cout << "";
+	//	test.at<double>(point.y,point.x) = 255;
+	//}
+	//imshow("test", test);
 	return -1;
 }
 
 
 int runOpdracht3() {
-	Mat image = imread("8objecten.png", CV_LOAD_IMAGE_COLOR);
+	Mat image = imread("monsters.jpg", CV_LOAD_IMAGE_COLOR);
 	if (!image.data)
 	{
 		cout << "Could not open or find the image" << std::endl;
@@ -171,8 +180,74 @@ int runOpdracht3() {
 	//find all contours
 	allContours(treshold_image, contourVector);
 	allBoundingBoxes(contourVector, bbs, treshold_2);
-	enclosedPixels(contourVector[1], regionPixels);
+	enclosedPixels(contourVector[0], regionPixels);
 
 	waitKey(0);
 	return 0;
+}
+
+void imageOfROI(vector<vector<Point>> & contourVecVec) {
+	vector<vector<Point>> regionsPixels;
+	for (int i = 0; i < contourVecVec.size(); i++) {
+		vector<Point> regionPixels;
+		vector<Point> contour = contourVecVec[i];
+		int test = enclosedPixels(contour, regionPixels);
+		//iuiuh
+		int minX, minY, maxX, maxY;
+		minX = maxX = contour[0].x;
+		minY = maxY = contour[0].y;
+		for (int j = 1; j < contour.size(); j++) {
+			Point currentPoint = contour[j];
+			if (currentPoint.x < minX)
+				minX = currentPoint.x;
+			else if (currentPoint.x > maxX)
+				maxX = currentPoint.x;
+			if (currentPoint.y < minY)
+				minY = currentPoint.y;
+			else if (currentPoint.y > maxY)
+				maxY = currentPoint.y;
+		}
+		stringstream s;
+		s << "8object" << i << ".bmp";
+		Mat roiMap = Mat( (maxY - minY) + 1,(maxX - minX) + 1,CV_64F);
+		roiMap = 0;
+		for (Point point : regionPixels)
+		{
+			roiMap.at<double>((point.y - minY), (point.x - minX)) = 255;
+		}
+		imwrite(s.str(), roiMap);
+		regionsPixels.push_back(regionPixels);
+	}
+	cout << "amount of objects " << regionsPixels.size() << endl;
+	cout << "first region " << regionsPixels[0].size() << endl;
+	return;
+}
+
+int runOpdracht3c() {
+	Mat image = imread("8objecten.png", CV_LOAD_IMAGE_COLOR);
+	if (!image.data)
+	{
+		cout << "Could not open or find the image" << std::endl;
+		return -1;
+	}
+	Mat gray_image, blur, treshold_image, treshold_2;
+	//make gray image
+	cvtColor(image, gray_image, CV_BGR2GRAY);
+	//bluring image
+	GaussianBlur(gray_image, blur, Size(7, 7), 0, 0);
+	imshow("test", blur);
+	threshold(blur, treshold_image, 50, 1, THRESH_BINARY_INV);
+	threshold(blur, treshold_2, 50, 255, THRESH_BINARY_INV);
+	//imshow("source image", treshold_image);
+
+	vector<vector<Point>> contourVector, bbs;
+	//find all contours
+	allContours(treshold_image, contourVector);
+	allBoundingBoxes(contourVector, bbs, treshold_2);
+	imageOfROI(contourVector);
+	waitKey(0);
+	return 0;
+	
+
+
 }

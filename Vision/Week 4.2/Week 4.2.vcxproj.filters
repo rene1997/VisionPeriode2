@@ -18,15 +18,12 @@
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\stack\school\4. jaar 4\1) minor\Vision C++\periode 2\code bij Fase 3\avansvisionlib20.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="avansvisionlib.cpp">
+    <ClCompile Include="avansvisionlib20.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\stack\school\4. jaar 4\1) minor\Vision C++\periode 2\code bij Fase 3\avansvisionlib20.h">
+    <ClInclude Include="avansvisionlib20.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="avansvisionlib.h">

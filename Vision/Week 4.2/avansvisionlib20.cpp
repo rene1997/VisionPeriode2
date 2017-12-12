@@ -8,7 +8,7 @@
 // Note: Students of Avans are free to use this library in projects and for own vision competence development. Others may ask permission to use it by means 
 // of sending an email to Jan Oostindie, i.e. jac.oostindie@avans.nl
 
-#include "avansvisionlib.h"
+#include "avansvisionlib20.h"
 #include <math.h>
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */

@@ -132,7 +132,8 @@ int enclosePixel(vector<Point> & regionPixels, Point & checkPoint)
 	return 1;
 }
 
-int enclosedPixels(const vector<Point> & contourVec, vector<Point> & regionPixels){	//calcultate midpoint:
+int enclosedPixels(const vector<Point> & contourVec, vector<Point> & regionPixels){
+	//calcultate midpoint:
 	Point minY = contourVec[0];
 	for (Point point : contourVec) {
 		regionPixels.push_back(point);

@@ -8,11 +8,19 @@
 #include <iostream>
 #include <string>
 #include <iomanip>
+#include <opencv2/shape/hist_cost.hpp>
 //#include "avansvisionlib20.h" // versie 2.0 (!)
 
 using namespace cv;
 using namespace std;
 
 int main() {
+	Mat image, gray_image;
+	VideoCapture capture = VideoCapture(0);
+	capture >> image;
+	cvtColor(image, gray_image, CV_BGR2GRAY);
+	imshow("camera",image);
+	imshow("gray_Image", image);
+	waitKey(0);
 	return 0;
 }

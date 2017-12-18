@@ -48,7 +48,7 @@ int allContours(Mat binaryImage, vector<vector<Point>> & contourVecVec) {
 	return -1;
 }
 
-int allBoundingBoxes(const vector<vector<Point>> & contours, vector <vector<Point>> & bbs, Mat treshold) {
+int allBoundingBoxes(const vector<vector<Point>> & contours, vector <vector<Point>> & bbs, vector<Mat> & singleBlobs, Mat binaryImage) {
 	for (int i = 0; i < contours.size(); i++) {
 		int minX, minY, maxX, maxY;
 		vector<Point> currentContour = contours[i];
@@ -69,32 +69,22 @@ int allBoundingBoxes(const vector<vector<Point>> & contours, vector <vector<Poin
 		for (int j = minX; j < maxX; j++) {
 			currentBox.push_back({ j,minY });
 			currentBox.push_back({ j,maxY });
-			treshold.at<uchar>({ j,minY }) = 255;
-			treshold.at<uchar>({ j,maxY }) = 255;
 		}
 
 		for (int j = minY; j < maxY; j++) {
 			currentBox.push_back({ minX,j });
 			currentBox.push_back({ maxX,j });
-			treshold.at<uchar>({ minX,j }) = 255;
-			treshold.at<uchar>({ maxX,j }) = 255;
 		}
-		stringstream s;
-		s << "8obj" << i << ".bmp";
-		Mat roiMap;
-		roiMap = treshold(Rect(minX, minY, (maxX - minX), (maxY - minY)));
-		imwrite(s.str(), roiMap);
+		Mat blobMat = binaryImage(Rect(minX, minY, (maxX - minX), (maxY - minY)));
+		singleBlobs.push_back(blobMat);
 
 		bbs.push_back(currentBox);
 	}
-
-	imshow("bbs", treshold);
-
 	return 0;
 }
 
 
-void makeGrid(vector<Point> & contour, vector<Point> & newContour, int scale, Mat & image) {
+void makeGrid(vector<Point> & contour, vector<Point> & newContour, int scale) {
 	int x = 0;
 	int y = 0;
 	//Mat testImage = image.clone();
@@ -114,10 +104,9 @@ void makeGrid(vector<Point> & contour, vector<Point> & newContour, int scale, Ma
 			x = y = 0;
 		}
 	}
-	//imshow("grid test image", testImage);
 }
 
-double bendingEnergy(Mat binaryImage, vector<Point> & contourvec) {
+double bendingEnergy(vector<Point> & contourvec) {
 	double energy = 0;
 	double direction = 0;
 	for (int i = 0; i < contourvec.size(); i++) {

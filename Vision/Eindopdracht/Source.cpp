@@ -14,6 +14,16 @@ using namespace std;
 
 void trainNeuralNetwork(Mat image, int objectClass);
 
+struct classData {
+	vector<Point> contour;
+	int energy;
+	int area;
+	int numberOfHoles;
+};
+
+
+vector<classData> pictureData;
+
 int main() {
 	Mat image, gray_image;
 	VideoCapture capture = VideoCapture(0);
@@ -47,20 +57,52 @@ int main() {
 }
 
 void trainNeuralNetwork(Mat image, int objectClass) {
-	//treshold:
+	//treshold and convert to gray
 	Mat gray_image, treshold_image, mat16s, labeled;
 	vector<Point2d*> startPoints, posVec;
 	vector<int> areaVec;
-
 	cvtColor(image, gray_image, CV_BGR2GRAY);
 	threshold(gray_image, treshold_image, 122, 255, CV_THRESH_BINARY);
+
+	//label blobs
 	treshold_image.convertTo(mat16s, CV_16S);
-	//get start point of blobs.
 	int blob2Amount = labelBLOBsInfo(mat16s, labeled, startPoints, posVec, areaVec);
+
+	//get contours
+	vector<vector<Point>> contourVector, bbs;
+	vector<Mat> singleMat;
+	allContours(treshold_image, contourVector);
+	allBoundingBoxes(contourVector, bbs, singleMat, treshold_image);
+
+	//for each contour get energy feature
+	for (int i = 0; i < contourVector.size(); i ++) {
+		vector<Point> gridContour;
+		vector < vector<Point>> contours;
+		vector< Vec4i > hierarchy;
+		int numberOfHoles = 0;
+		makeGrid(contourVector[i], gridContour, 10);
+		int energy = bendingEnergy(gridContour);
+		
+		//find number of holes
+		findContours(singleMat[i], contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+		for (int i = 0; i< contours.size(); i = hierarchy[i][0]) // iterate through each contour.
+		{
+			if (hierarchy[i][2]<0) 
+				numberOfHoles++;
+		}
+		//push feature to feature data
+		pictureData.push_back({ gridContour,energy,areaVec[i],numberOfHoles });
+	}
 
 	//get class number
 	int number = objectClass - '0' ;
 	if (number < 0 || number > 9) {
-		//TODO:  + / -
+		cout << "got number: " << number << endl;
+		if (number == -5) {
+			//got +
+		}
+		else if (number == -3) {
+			//got - 
+		}
 	}
 }

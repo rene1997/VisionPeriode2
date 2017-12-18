@@ -7,6 +7,8 @@
 //      Contains a BPN neural network. 
 // Note: Students of Avans are free to use this library in projects and for own vision competence development. Others may ask permission to use it by means 
 // of sending an email to Jan Oostindie, i.e. jac.oostindie@avans.nl
+#ifndef VISIONLIB_H
+#define VISIONLIB_H
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -333,3 +335,6 @@ Mat BPN(Mat II, Mat V, Mat W);
 /*END********************************************** BACK PROPAGATION NEURAL NETWORK ******************************************************************/
 /*****************************************************************************************************************************************************/
 
+
+
+#endif // ! VISIONLIB_H

@@ -21,10 +21,14 @@
   <ItemGroup>
     <ClCompile Include="avansvisionlib20.cpp" />
     <ClCompile Include="bnp.cpp" />
+    <ClCompile Include="FeatureDetection.cpp" />
+    <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="avansvisionlib20.h" />
+    <ClInclude Include="FeatureDetection.h" />
+    <ClInclude Include="FileIO.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -782,27 +782,39 @@ void loadTrainingSet1(Mat & ITset, Mat & OTset) {
 
 	// input of trainingset
 	// remark: nummber of columns == number of inputneurons of the BPN
-	ITset = (Mat_<double>(8, 5) <<
-		1, 0.4, -0.7, 0.1, 0.71,
-		1, 0.3, -0.5, 0.05, 0.34,
-		1, 0.6, 0.1, 0.3, 0.12,
-		1, 0.2, 0.4, 0.25, 0.34,
-		1, -0.2, 0.12, 0.56, 1.0,
-		1, 0.1, -0.34, 0.12, 0.56,
-		1, 0.6, 0.12, 0.56, 1.0,
-		1, 0.56, -0.2, 0.12, 0.56);
+	//ITset = (Mat_<double>(8, 5) <<
+	//	1, 0.4, -0.7, 0.1, 0.71,
+	//	1, 0.3, -0.5, 0.05, 0.34,
+	//	1, 0.6, 0.1, 0.3, 0.12,
+	//	1, 0.2, 0.4, 0.25, 0.34,
+	//	1, -0.2, 0.12, 0.56, 1.0,
+	//	1, 0.1, -0.34, 0.12, 0.56,
+	//	1, 0.6, 0.12, 0.56, 1.0,
+	//	1, 0.56, -0.2, 0.12, 0.56);
 
-	// output of trainingset
-	// remark: nummber of columns == number of outputneurons of the BPN
-	OTset = (Mat_<double>(8, 2) <<
-		0, 0,
+	//// output of trainingset
+	//// remark: nummber of columns == number of outputneurons of the BPN
+	//OTset = (Mat_<double>(8, 2) <<
+	//	0, 0,
+	//	0, 0,
+	//	0, 1,
+	//	0, 1,
+	//	1, 0,
+	//	1, 0,
+	//	1, 1,
+	//	1, 1);
+	ITset = (Mat_<double>(4, 2) <<
 		0, 0,
 		0, 1,
-		0, 1,
 		1, 0,
-		1, 0,
-		1, 1,
-		1, 1);
+		1, 1
+		);
+	OTset = (Mat_<double>(4, 1) <<
+		0,
+		1,
+		1,
+		0
+		);
 } // loadTestTrainingSet1
 
 

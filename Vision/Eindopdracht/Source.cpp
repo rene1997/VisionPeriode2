@@ -62,10 +62,12 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 	vector<Point2d*> startPoints, posVec;
 	vector<int> areaVec;
 	cvtColor(image, gray_image, CV_BGR2GRAY);
-	threshold(gray_image, treshold_image, 122, 255, CV_THRESH_BINARY);
+	threshold(gray_image, treshold_image, 122, 1, THRESH_BINARY_INV);
+	imshow("treshold", treshold_image);
 
 	//label blobs
 	treshold_image.convertTo(mat16s, CV_16S);
+	imshow("treshold1", mat16s);
 	int blob2Amount = labelBLOBsInfo(mat16s, labeled, startPoints, posVec, areaVec);
 
 	//get contours
@@ -82,12 +84,14 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 		int numberOfHoles = 0;
 		makeGrid(contourVector[i], gridContour, 10);
 		int energy = bendingEnergy(gridContour);
+
+		imwrite("dstfsd.bmp", singleMat[i]);
 		
 		//find number of holes
 		findContours(singleMat[i], contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
-		for (int i = 0; i< contours.size(); i = hierarchy[i][0]) // iterate through each contour.
+		for (int i = 0; i< contours.size(); i++) // iterate through each contour.
 		{
-			if (hierarchy[i][2]<0) 
+			if (hierarchy[i][3] != -1)
 				numberOfHoles++;
 		}
 		//push feature to feature data

@@ -19,6 +19,8 @@
 using namespace cv;
 using namespace std;
 
+void bnp(Mat_<double>, Mat_<double>);
+
 // remark: a function call with a Mat-object parameter is a call by reference
 
 /*********************** PROTOTYPES of the function library ************************/

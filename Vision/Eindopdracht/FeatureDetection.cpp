@@ -75,7 +75,7 @@ int allBoundingBoxes(const vector<vector<Point>> & contours, vector <vector<Poin
 			currentBox.push_back({ minX,j });
 			currentBox.push_back({ maxX,j });
 		}
-		Mat blobMat = binaryImage(Rect(minX, minY, (maxX - minX), (maxY - minY)));
+		Mat blobMat = binaryImage(Rect(minX-1, minY-1, (3+maxX - minX), (3+maxY - minY)));
 		singleBlobs.push_back(blobMat);
 
 		bbs.push_back(currentBox);

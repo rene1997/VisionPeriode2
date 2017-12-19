@@ -21,7 +21,7 @@ const double MAX_OUTPUT_ERROR = 1E-10;
 const int MAXRUNS = 10000;
 
 //(int argc, char** argv)
-void bnp(Mat ITset, Mat OTset)
+void bnp(Mat_<double> ITset, Mat_<double> OTset)
 {
 	// IT, OT: input trainingset, output trainingset
 	//Mat ITset, OTset;

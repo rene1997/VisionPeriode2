@@ -21,6 +21,8 @@ struct classData {
 	int energy;
 	int area;
 	int numberOfHoles;
+	double amountOfDefects;
+	double meanValueDefects;
 	int expectedValue;
 };
 
@@ -58,7 +60,7 @@ int main() {
 		if(key == 'q')
 		{
 			int test = pictureData.size();
-			Mat trainingSet = (Mat_<double>(pictureData.size(), 3));
+			Mat trainingSet = (Mat_<double>(pictureData.size(), 5));
 			Mat expectedSet = (Mat_<double>(pictureData.size(), 4));
 			for (int i = 0; i<pictureData.size(); i++)
 			{
@@ -68,6 +70,8 @@ int main() {
 				trainingSet.at<double>(i, 1) = (double)pictureData[i].contour.size()/100;
 				//trainingSet.at<double>(i, 2) = (double)pictureData[i].energy/100;
 				trainingSet.at<double>(i, 2) = pictureData[i].numberOfHoles;
+				trainingSet.at<double>(i, 3) = pictureData[i].amountOfDefects;
+				trainingSet.at<double>(i, 4) = pictureData[i].meanValueDefects;
 				string x = convert(pictureData[i].expectedValue);
 				expectedSet.at<double>(i, 0) = x[0] - '0';
 				expectedSet.at<double>(i, 1) = x[1] - '0';
@@ -135,9 +139,25 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 		
 		//find number of holes
 		findContours(singleMat[i], contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
-		Moments mom =moments(contours[0]);
-		double hu[7];
-		HuMoments(mom, hu);
+
+		vector<int>  hullsI(contours[0].size()); // Indices to contour points
+		vector<Vec4i> defects;
+		convexHull(contours[0], hullsI, false);
+		convexityDefects(contours[0], hullsI, defects);
+		double amountOfDefects = 0, meanDefects = 0;
+		for (const Vec4i& v : defects)
+		{
+			float depth = v[3] / 500;
+			if (depth > 1) //  filter defects by depth, e.g more than 10
+			{
+				amountOfDefects++;
+				meanDefects += depth;
+			}
+		}
+		meanDefects = meanDefects / amountOfDefects;
+
+
+
 		for (int j = 0; j< contours.size(); j++) // iterate through each contour.
 		{
 			if (hierarchy[j][3] != -1)
@@ -146,7 +166,7 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 		/*vector<Point> test = fitEllipse(contours[0]);
 		boundingRect(contours[0]);*/
 		//push feature to feature data
-		pictureData.push_back({ gridContour,energy,areaVec[i],numberOfHoles });
+		pictureData.push_back({ gridContour,energy,areaVec[i],numberOfHoles,amountOfDefects/10,meanDefects/100 });
 	}
 
 	//get class number

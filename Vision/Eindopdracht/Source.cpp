@@ -58,16 +58,16 @@ int main() {
 		if(key == 'q')
 		{
 			int test = pictureData.size();
-			Mat trainingSet = (Mat_<double>(pictureData.size(), 4));
+			Mat trainingSet = (Mat_<double>(pictureData.size(), 3));
 			Mat expectedSet = (Mat_<double>(pictureData.size(), 4));
 			for (int i = 0; i<pictureData.size(); i++)
 			{
 				//int index = i * trainingSet.cols;
 				//trainingSet[index] = pictureData[i].area;
-				trainingSet.at<double>(i, 0) = pictureData[i].area;
-				trainingSet.at<double>(i, 1) = pictureData[i].contour.size();
-				trainingSet.at<double>(i, 2) = pictureData[i].energy;
-				trainingSet.at<double>(i, 3) = pictureData[i].numberOfHoles;
+				trainingSet.at<double>(i, 0) = (double)pictureData[i].area/1000;
+				trainingSet.at<double>(i, 1) = (double)pictureData[i].contour.size()/100;
+				//trainingSet.at<double>(i, 2) = (double)pictureData[i].energy/100;
+				trainingSet.at<double>(i, 2) = pictureData[i].numberOfHoles;
 				string x = convert(pictureData[i].expectedValue);
 				expectedSet.at<double>(i, 0) = x[0] - '0';
 				expectedSet.at<double>(i, 1) = x[1] - '0';
@@ -129,7 +129,7 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 		vector < vector<Point>> contours;
 		vector< Vec4i > hierarchy;
 		int numberOfHoles = 0;
-		makeGrid(contourVector[i], gridContour, 10);
+		makeGrid(contourVector[i], gridContour, 3);
 		int energy = bendingEnergy(gridContour);
 		imwrite("dstfsd.bmp", singleMat[i]);
 		
@@ -143,6 +143,8 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 			if (hierarchy[j][3] != -1)
 				numberOfHoles++;
 		}
+		/*vector<Point> test = fitEllipse(contours[0]);
+		boundingRect(contours[0]);*/
 		//push feature to feature data
 		pictureData.push_back({ gridContour,energy,areaVec[i],numberOfHoles });
 	}

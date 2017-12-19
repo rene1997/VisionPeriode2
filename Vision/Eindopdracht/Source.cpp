@@ -26,7 +26,7 @@ vector<classData> pictureData;
 
 int main() {
 	Mat image, gray_image;
-	VideoCapture capture = VideoCapture(0);
+	VideoCapture capture = VideoCapture(1);
 	while (1) {
 		capture >> image;
 		cvtColor(image, gray_image, CV_BGR2GRAY);

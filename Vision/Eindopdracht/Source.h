@@ -1,0 +1,26 @@
+#pragma once
+
+#ifndef SOURCE_H
+#define SOURCE_H
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv/cv.h>
+#include <opencv2/shape/hist_cost.hpp>
+#include <opencv2/ml.hpp>
+
+#include <iostream>
+
+#include "avansvisionlib20.h" 
+#include "FeatureDetection.h"
+#include "FileIO.h"
+#include "Calibration.h"
+
+
+using namespace cv;
+using namespace std;
+
+
+
+#endif // !SOURCE_H
+

@@ -1,31 +1,8 @@
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv/cv.h>
-#include <opencv2/shape/hist_cost.hpp>
-
-#include <iostream>
-
-#include "avansvisionlib20.h" 
-#include "FeatureDetection.h"
-#include "FileIO.h"
-#include "Calibration.h"
-#include <opencv2/ml.hpp>
-
-using namespace cv;
-using namespace std;
+#include "Source.h"
 
 void trainNeuralNetwork(Mat image, int objectClass);
 string convert(unsigned int val);
 
-struct classData {
-	vector<Point> contour;
-	int energy;
-	int area;
-	int numberOfHoles;
-	double amountOfDefects;
-	double meanValueDefects;
-	int expectedValue;
-};
 
 
 vector<classData> pictureData;
@@ -33,6 +10,10 @@ vector<classData> pictureData;
 int main() {
 	//load calibration:
 	loadCalibration();
+	vector<Point> testpoints;
+	testpoints.push_back({ 1,1 });
+	pictureData.push_back({ testpoints, 55,100,2,2,25,8});
+	saveData(pictureData);
 
 	Mat image, gray_image, correctImage;
 	VideoCapture capture = VideoCapture(0);

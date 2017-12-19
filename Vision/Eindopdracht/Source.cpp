@@ -8,6 +8,7 @@
 #include "avansvisionlib20.h" 
 #include "FeatureDetection.h"
 #include "FileIO.h"
+#include "Calibration.h"
 #include <opencv2/ml.hpp>
 
 using namespace cv;
@@ -30,12 +31,17 @@ struct classData {
 vector<classData> pictureData;
 
 int main() {
-	Mat image, gray_image;
-	VideoCapture capture = VideoCapture(1);
+	//load calibration:
+	loadCalibration();
+
+	Mat image, gray_image, correctImage;
+	VideoCapture capture = VideoCapture(0);
 	while (1) {
 		capture >> image;
-		cvtColor(image, gray_image, CV_BGR2GRAY);
-		imshow("camera", image);
+		fixFrame(image, correctImage);
+		cvtColor(correctImage, gray_image, CV_BGR2GRAY);
+		imshow("original", image);
+		imshow("calibrated", correctImage);
 		imshow("gray_Image", gray_image);
 		int key = waitKey(1);
 		if (key == 't') {
@@ -79,6 +85,9 @@ int main() {
 				expectedSet.at<double>(i, 3) = x[3] - '0';
 			}
 			bnp(trainingSet, expectedSet);
+		}
+		if (key == 'c') {
+			saveCalibration(capture);
 		}
 		if (key == ' ') {
 			//TODO: 

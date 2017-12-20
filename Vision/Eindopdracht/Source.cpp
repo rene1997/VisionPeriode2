@@ -48,20 +48,20 @@ int main() {
 		if(key == 'q')
 		{
 			int test = pictureData.size();
-			Mat trainingSet = (Mat_<double>(pictureData.size(), 7));
+			Mat trainingSet = (Mat_<double>(pictureData.size(), 4));
 			Mat expectedSet = (Mat_<double>(pictureData.size(), 4));
 			for (int i = 0; i<pictureData.size(); i++)
 			{
 				//int index = i * trainingSet.cols;
 				//trainingSet[index] = pictureData[i].area;
-				trainingSet.at<double>(i, 0) = (double)pictureData[i].area;
-				trainingSet.at<double>(i, 1) = (double)pictureData[i].contour.size()/1000;
+				//trainingSet.at<double>(i, 0) = (double)pictureData[i].area;
+				trainingSet.at<double>(i, 0) = (double)pictureData[i].contour.size()/1000;
 				//trainingSet.at<double>(i, 2) = (double)pictureData[i].energy/100;
-				trainingSet.at<double>(i, 2) = pictureData[i].numberOfHoles;
-				trainingSet.at<double>(i, 3) = pictureData[i].amountOfDefects;
-				trainingSet.at<double>(i, 4) = pictureData[i].meanValueDefects;
-				trainingSet.at<double>(i, 5) = pictureData[i].aspectRatio;
-				trainingSet.at<double>(i, 6) = pictureData[i].centerPoint;
+				trainingSet.at<double>(i, 1) = pictureData[i].numberOfHoles;
+				trainingSet.at<double>(i, 2) = pictureData[i].amountOfDefects;
+				trainingSet.at<double>(i, 3) = pictureData[i].meanValueDefects;
+				//trainingSet.at<double>(i, 5) = pictureData[i].aspectRatio;
+				//trainingSet.at<double>(i, 6) = pictureData[i].centerPoint;
 				string x = convert(pictureData[i].expectedValue);
 				expectedSet.at<double>(i, 0) = x[0] - '0';
 				expectedSet.at<double>(i, 1) = x[1] - '0';
@@ -138,7 +138,12 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 		imwrite("dstfsd.bmp", singleMat[i]);
 		
 		//find number of holes
-		findContours(singleMat[i], contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+		//findContours(singleMat[i], contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+		//vector<vector<Point>> c;
+
+		//findContours(gray_image, c, RETR_EXTERNAL, 0);
+		findContours(gray_image, c, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+		cout << "freeman test " << c[0] << endl;
 
 		vector<int>  hullsI(gridContour.size()); // Indices to contour points
 		vector<Vec4i> defects;
@@ -165,9 +170,14 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 		double centerX = rect.center.x;
 		double centerY = rect.center.y;
 
-		double  aspectratio = width / height / 100;
+		double  aspectratio = (width / height) /10;
 		double centerPoint = (centerX * centerY);
+
 		
+		//if(aspectratio>1 )
+		//{
+		//	aspectratio = height / width;
+		//}
 		//1double extent = contourArea(contours[0]) / rect.size();
 
 
@@ -180,7 +190,7 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 		/*vector<Point> test = fitEllipse(contours[0]);
 		boundingRect(contours[0]);*/
 		//push feature to feature data
-		pictureData.push_back({ contours[0],(double)energy/100,(double)areaVec[i]/1000,(double)numberOfHoles/10,(double)amountOfDefects/10,meanDefects/100, aspectratio*100 , centerPoint/1000});
+		pictureData.push_back({ contours[0],(double)energy/100,(double)areaVec[i]/1000,(double)numberOfHoles/10,(double)amountOfDefects/10,meanDefects/100, aspectratio , centerPoint/1000});
 	}
 
 	//get class number

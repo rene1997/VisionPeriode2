@@ -21,16 +21,21 @@ const double MAX_OUTPUT_ERROR = 1E-10;
 const int MAXRUNS = 10000;
 
 
+bool isloaded = false;
+Mat W0, V0;
 
 //(int argc, char** argv)
 void bnp(Mat_<double> ITset, Mat_<double> OTset)
 {
+	if (!isloaded) {
+		isloaded = loadData(V0, W0);
+	}
 	// IT, OT: input trainingset, output trainingset
 	//Mat ITset, OTset;
 
 	// V0, W0   : weightfactor matrices
 	// dV0, dW0 : weightfactor correction matrices
-	Mat V0, W0, dW0, dV0;
+	Mat dW0, dV0;
 
 	// default number of hiddenNeurons. The definite number is user input  
 	// inputNeurons and outputNeurons are implicitly determined via
@@ -147,10 +152,24 @@ void bnp(Mat_<double> ITset, Mat_<double> OTset)
 		cout << endl;
 	}
 	saveData(V0, W0);
+	isloaded = true;
 	cout << endl << endl << "Press ENTER for exit";
 	getline(cin, dummy);
 	getline(cin, dummy);
-	
-
 	//return 0;
+}
+
+void getBpnValue(Mat_<double> input, Mat_<double> & output)
+{
+	if (!isloaded) {
+		isloaded = loadData(V0, W0);
+	}
+	Mat OH;
+	Mat IT = transpose(input);
+	output = BPN(IT, V0, W0);
+	//calculateOutputBPN(OH, W0, output);
+	for (int i = 0; i < output.rows; i++)
+		for (int j = 0; j < output.cols; j++)
+			output.at<double>(i, j) = nearbyint(output.at<double>(i, j));
+	cout << "got output: " << output << endl;
 }

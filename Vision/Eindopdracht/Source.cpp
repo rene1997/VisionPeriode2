@@ -1,20 +1,15 @@
 #include "Source.h"
 
 void trainNeuralNetwork(Mat image, int objectClass);
+void determineClass(Mat gray_image, vector<classData>& classes);
 string convert(unsigned int val);
-
-
 
 vector<classData> pictureData;
 
 int main() {
 	//load calibration:
 	loadCalibration();
-	//vector<Point> testpoints;
-	//testpoints.push_back({ 1,1 });
-	//pictureData.push_back({ testpoints, 55,100,2,2,25,8});
-	////saveData(pictureData);
-
+	
 	Mat image, gray_image, correctImage;
 	VideoCapture capture = VideoCapture(1);
 	while (1) {
@@ -43,7 +38,6 @@ int main() {
 				if (trainingClass == '+') pictureData[i].expectedValue = 15;
 				else pictureData[i].expectedValue = trainingClass - '0';
 			}
-			
 		}
 		if(key == 'q')
 		{
@@ -74,7 +68,19 @@ int main() {
 			saveCalibration(capture);
 		}
 		if (key == ' ') {
-			//TODO: 
+			vector<classData> input;
+			determineClass(gray_image, input);
+			bool done = false;
+			while (!done) {
+				for (classData c : input) {
+					putText(gray_image, to_string(c.expectedValue), c.startPoint,
+						FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(200, 200, 250), 2, CV_AA);
+				}
+				imshow("gray_Image", gray_image);
+				int key = waitKey(0);
+				if (key == ' ')
+					done = true;
+			}
 		}
 	}
 	
@@ -99,6 +105,115 @@ string convert(unsigned int val)
 	return s.str();
 }
 
+int binary_to_decimal(const std::vector<int>& bits)
+{
+	int result = 0;
+	int base = 1;
+
+	//Supposing the MSB is at the begin of the bits vector:
+	for (int i = bits.size() - 1; i >= 0; --i)
+	{
+		result += bits[i] * base;
+		base *= 2;
+	}
+
+	return result;
+}
+
+
+void determineClass(Mat gray_image, vector<classData>& classes)
+{
+	Mat treshold_image, mat16s, labeled;
+	vector<int> areaVec;
+	vector<Point2d*> startPoints, posVec;
+	threshold(gray_image, treshold_image, 175, 1, THRESH_BINARY_INV);
+	treshold_image.convertTo(mat16s, CV_16S);
+	int blob2Amount = labelBLOBsInfo(mat16s, labeled, startPoints, posVec, areaVec);
+
+	//get contours
+	vector<vector<Point>> contourVector, bbs;
+	vector< Vec4i > hierarchy2;
+	vector<Mat> singleMats;
+	findContours(treshold_image, contourVector, hierarchy2, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+	for (int i = contourVector.size() - 1; i >= 0; i--) {
+		if (hierarchy2[i][3] != -1)
+			contourVector.erase(contourVector.begin() + i);
+	}
+	allBoundingBoxes(contourVector, bbs, singleMats, treshold_image);
+
+	for (int i = 0; i < contourVector.size(); i++)
+	{
+		vector<Point> gridContour;
+		vector < vector<Point>> contours;
+		vector< Vec4i > hierarchy;
+		int numberOfHoles = 0;
+		makeGrid(contourVector[i], gridContour);
+		int energy = bendingEnergy(gridContour);
+		imwrite("dstfsd.bmp", singleMats[i]);
+
+		//find number of holes
+		findContours(singleMats[i], contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+
+		vector<int>  hullsI(gridContour.size()); // Indices to contour points
+		vector<Vec4i> defects;
+		convexHull(gridContour, hullsI, false);
+		convexityDefects(gridContour, hullsI, defects);
+		double amountOfDefects = 0;
+		double meanDefects = 0;
+		for (const Vec4i& v : defects)
+		{
+			float depth = v[3] / 500;
+			if (depth > 1) //  filter defects by depth, e.g more than 10
+			{
+				amountOfDefects++;
+				meanDefects += depth;
+			}
+		}
+		if (amountOfDefects != 0)
+			meanDefects = meanDefects / amountOfDefects;
+
+		//RotatedRect rect =  fitEllipse(contours[0]);
+		RotatedRect rect = minAreaRect(contours[0]);
+		double width = rect.size.width;
+		double height = rect.size.height;
+		double centerX = rect.center.x;
+		double centerY = rect.center.y;
+
+		double  aspectratio = width / height;
+		if (aspectratio > 1)
+			aspectratio = height / width;
+		double centerPoint = (centerX * centerY);
+
+		//1double extent = contourArea(contours[0]) / rect.size();
+
+		for (int j = 0; j< contours.size(); j++) // iterate through each contour.
+		{
+			if (hierarchy[j][3] != -1)
+				numberOfHoles++;
+		}
+		Mat inputBpn(Mat_<double>(1, 7));
+		Mat_<double> output;
+		inputBpn.at<double>(0, 0) = (double)areaVec[i]/1000;
+		inputBpn.at<double>(0, 1) = (double)contours[0].size() / 1000;
+		//trainingSet.at<double>(i, 2) = (double)pictureData[i].energy/100;
+		inputBpn.at<double>(0, 2) = numberOfHoles/10;
+		inputBpn.at<double>(0, 3) = amountOfDefects/10;
+		inputBpn.at<double>(0, 4) = meanDefects/100;
+		inputBpn.at<double>(0, 5) = aspectratio;
+		inputBpn.at<double>(0, 6) = centerPoint/1000;
+		getBpnValue(inputBpn, output);
+		vector<int> binairoutput;
+		for (int i = 0; i < output.rows; i++) {
+			binairoutput.push_back(output.at<double>(i, 0));
+		}
+		int objectClass = binary_to_decimal(binairoutput);	
+		classData currentClass;
+		currentClass.expectedValue = objectClass;
+		currentClass.startPoint =  Point(startPoints[i]->y,startPoints[i]->x);
+		classes.push_back(currentClass);
+	}
+}
+
 void trainNeuralNetwork(Mat image, int objectClass) {
 	//treshold and convert to gray
 	Mat gray_image, treshold_image, mat16s, labeled;
@@ -120,7 +235,6 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 	vector<Mat> singleMat;
 	//allContours(treshold_image, contourVector);
 	findContours(treshold_image, contourVector, hierarchy2,CV_RETR_CCOMP,CV_CHAIN_APPROX_SIMPLE);
-	int maxContourSize = 0;
 	for (int i = contourVector.size() - 1; i >= 0; i--) {
 		if (hierarchy2[i][3] != -1)
 			contourVector.erase(contourVector.begin() + i);
@@ -165,7 +279,9 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 		double centerX = rect.center.x;
 		double centerY = rect.center.y;
 
-		double  aspectratio = width / height / 100;
+		double  aspectratio = width / height;
+		if (aspectratio > 1)
+			aspectratio = height / width;
 		double centerPoint = (centerX * centerY);
 		
 		//1double extent = contourArea(contours[0]) / rect.size();
@@ -180,7 +296,7 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 		/*vector<Point> test = fitEllipse(contours[0]);
 		boundingRect(contours[0]);*/
 		//push feature to feature data
-		pictureData.push_back({ contours[0],(double)energy/100,(double)areaVec[i]/1000,(double)numberOfHoles/10,(double)amountOfDefects/10,meanDefects/100, aspectratio*100 , centerPoint/1000});
+		pictureData.push_back({ contours[0],(double)energy/100,(double)areaVec[i]/1000,(double)numberOfHoles/10,(double)amountOfDefects/10,meanDefects/100, aspectratio, centerPoint/1000});
 	}
 
 	//get class number

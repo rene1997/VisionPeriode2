@@ -30,6 +30,7 @@ struct classData {
 	double aspectRatio;
 	double centerPoint;
 	int expectedValue;
+	Point startPoint;
 };
 
 

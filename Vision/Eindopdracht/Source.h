@@ -15,6 +15,7 @@
 #include "FeatureDetection.h"
 #include "FileIO.h"
 #include "Calibration.h"
+#include "Calculation.h"
 
 
 using namespace cv;

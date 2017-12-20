@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="avansvisionlib20.cpp" />
     <ClCompile Include="bnp.cpp" />
+    <ClCompile Include="Calculation.cpp" />
     <ClCompile Include="Calibration.cpp" />
     <ClCompile Include="FeatureDetection.cpp" />
     <ClCompile Include="FileIO.cpp" />
@@ -28,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="avansvisionlib20.h" />
+    <ClInclude Include="Calculation.h" />
     <ClInclude Include="Calibration.h" />
     <ClInclude Include="FeatureDetection.h" />
     <ClInclude Include="FileIO.h" />

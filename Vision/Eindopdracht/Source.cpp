@@ -72,12 +72,23 @@ int main() {
 			vector<classData> input;
 			determineClass(gray_image, input);
 			bool done = false;
+			int answer = 0;
+			Function f;
+			vector<int> answers;
+			for (classData c : input)
+				answers.push_back(c.expectedValue);
+			getStructure(answers, f);
+			calculate(f, answer);
 			while (!done) {
 				for (classData c : input) {
 					putText(gray_image, to_string(c.expectedValue), c.startPoint,
 						FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(200, 200, 250), 2, CV_AA);
 				}
+				putText(gray_image, to_string(answer), { input.end()->startPoint.x + 30, input.end()->startPoint.y },
+					FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(200, 200, 250), 2, CV_AA);
+
 				imshow("gray_Image", gray_image);
+				
 				int key = waitKey(0);
 				if (key == ' ')
 					done = true;

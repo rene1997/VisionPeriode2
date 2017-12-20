@@ -20,6 +20,8 @@ const double MAX_OUTPUT_ERROR = 1E-10;
 // maximaal aantal runs dat uitgevoerd wordt bij het trainen
 const int MAXRUNS = 10000;
 
+
+
 //(int argc, char** argv)
 void bnp(Mat_<double> ITset, Mat_<double> OTset)
 {
@@ -144,10 +146,11 @@ void bnp(Mat_<double> ITset, Mat_<double> OTset)
 
 		cout << endl;
 	}
-
+	saveData(V0, W0);
 	cout << endl << endl << "Press ENTER for exit";
 	getline(cin, dummy);
 	getline(cin, dummy);
+	
 
 	//return 0;
 }

@@ -25,20 +25,22 @@ int allContours(Mat binaryImage, vector<vector<Point>> & contourVecVec) {
 			bool added = false;
 			int edge = 0;
 			for (int c = 0; c < clockWiseSize; c++) {
-				if ((binaryImage.at<uchar>((y + clockWiseY[c]), (x + clockWiseX[c])) == 0))
-				{
-					edge++;
+				if (!(y + clockWiseY[c] < 0 || x + clockWiseX[c] < 0 || y + clockWiseY[c] >= binaryImage.rows || x + clockWiseX[c] >= binaryImage.cols)) {
+					if ((binaryImage.at<uchar>((y + clockWiseY[c]), (x + clockWiseX[c])) == 0))
+					{
+						edge++;
+					}
+					else if (edge>1 && !added)
+					{
+						x += clockWiseX[c];
+						y += clockWiseY[c];
+						Point point = { x,y };
+						points.push_back(point);
+						added = true;
+						mooreBoundary.at<uchar>(y, x) = 255;
+					}
+					if (!added && c == clockWiseSize - 1) { c = 0; };
 				}
-				else if (edge>1 && !added)
-				{
-					x += clockWiseX[c];
-					y += clockWiseY[c];
-					Point point = { x,y };
-					points.push_back(point);
-					added = true;
-					mooreBoundary.at<uchar>(y, x) = 255;
-				}
-				if (!added && c == clockWiseSize - 1) { c = 0; };
 			}
 		}
 		//imshow("test", mooreBoundary);
@@ -84,7 +86,12 @@ int allBoundingBoxes(const vector<vector<Point>> & contours, vector <vector<Poin
 }
 
 
-void makeGrid(vector<Point> & contour, vector<Point> & newContour, int scale) {
+void makeGrid(vector<Point> & contour, vector<Point> & newContour) {
+	if (contour.size() < 50) {
+		newContour = contour;
+		return;
+	}
+	int scale = contour.size() / 50;
 	int x = 0;
 	int y = 0;
 	//Mat testImage = image.clone();

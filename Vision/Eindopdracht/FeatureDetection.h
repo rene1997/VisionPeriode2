@@ -12,7 +12,7 @@ using namespace std;
 
 int allContours(Mat binaryImage, vector<vector<Point>> & contourVecVec);
 int allBoundingBoxes(const vector<vector<Point>> & contours, vector <vector<Point>> & bbs, vector<Mat> & singleBlobs, Mat binaryImage);
-void makeGrid(vector<Point> & contour, vector<Point> & newContour, int scale);
+void makeGrid(vector<Point> & contour, vector<Point> & newContour);
 double bendingEnergy(vector<Point> & contourvec);
 
 #endif // !FEATUREDETECTION_H

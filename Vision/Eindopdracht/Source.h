@@ -20,6 +20,18 @@
 using namespace cv;
 using namespace std;
 
+struct classData {
+	vector<Point> contour;
+	double energy;
+	double area;
+	double numberOfHoles;
+	double amountOfDefects;
+	double meanValueDefects;
+	double aspectRatio;
+	double centerPoint;
+	int expectedValue;
+};
+
 
 
 #endif // !SOURCE_H

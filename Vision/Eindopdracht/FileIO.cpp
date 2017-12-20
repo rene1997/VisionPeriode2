@@ -1,20 +1,27 @@
 #include "FileIO.h"
 
-bool saveData(vector<classData> featureData)
+bool saveData(Mat v0, Mat w0)
 {
-	//try
-	//{
-	//	ofstream fs("bnpData.dat");
-	//	if (fs.is_open()) {
-	//			fs << "featureData:";
-	//		for (classData data : featureData) {
-	//			fs << data ;
-	//		}	
-	//	}
-	//}
-	//catch (const std::exception&)
-	//{
-	//	return false;
-	//}
-	return true;
+	try {
+		FileStorage fs("bnpData.yml", FileStorage::WRITE);
+		fs << "v0" << v0 << "w0" << w0;
+		fs.release();
+		return true;
+	}
+	catch(Exception ex){
+		return false;
+	}
+}
+
+bool loadData(Mat & v0, Mat &w0) {
+	try {
+		FileStorage fs("bnpData.yml", FileStorage::READ);
+		fs["v0"] >> v0;
+		fs["w0"] >> w0;
+		fs.release();
+		return true;
+	}
+	catch (Exception ex) {
+		return false;
+	}
 }

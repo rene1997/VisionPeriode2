@@ -15,6 +15,7 @@
 #include <opencv/cv.h>
 #include <iostream>
 #include <string>
+#include "FileIO.h"
 
 using namespace cv;
 using namespace std;

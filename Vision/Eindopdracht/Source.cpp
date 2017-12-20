@@ -42,7 +42,7 @@ int main() {
 		if(key == 'q')
 		{
 			int test = pictureData.size();
-			Mat trainingSet = (Mat_<double>(pictureData.size(), 7));
+			Mat trainingSet = (Mat_<double>(pictureData.size(), 6));
 			Mat expectedSet = (Mat_<double>(pictureData.size(), 4));
 			for (int i = 0; i<pictureData.size(); i++)
 			{
@@ -56,7 +56,7 @@ int main() {
 				trainingSet.at<double>(i, 4) = pictureData[i].meanValueDefects;
 				trainingSet.at<double>(i, 5) = pictureData[i].defectSize;
 				//trainingSet.at<double>(i, 7) = pictureData[i].aspectRatio;
-				trainingSet.at<double>(i, 6) = pictureData[i].centerPoint;
+				//trainingSet.at<double>(i, 6) = pictureData[i].centerPoint;
 				string x = convert(pictureData[i].expectedValue);
 				expectedSet.at<double>(i, 0) = x[0] - '0';
 				expectedSet.at<double>(i, 1) = x[1] - '0';
@@ -205,13 +205,14 @@ void determineClass(Mat gray_image, vector<classData>& classes)
 		//trainingSet.at<double>(i, 4) = pictureData[i].defectSize;
 
 
-		Mat inputBpn(Mat_<double>(1, 5));
+		Mat inputBpn(Mat_<double>(1, 6));
 		Mat_<double> output;
-		inputBpn.at<double>(0, 0) = (double)contours[0].size()/1000;
-		inputBpn.at<double>(0, 1) = numberOfHoles/10;
-		inputBpn.at<double>(0, 2) = amountOfDefects/10;
-		inputBpn.at<double>(0, 3) = meanDefects/100;
-		inputBpn.at<double>(0, 4) = defectSize / 100;
+		inputBpn.at<double>(0, 0) = (double)areaVec.size() / 1000;
+		inputBpn.at<double>(0, 1) = (double)contours[0].size()/100;
+		inputBpn.at<double>(0, 2) = numberOfHoles/10;
+		inputBpn.at<double>(0, 3) = amountOfDefects/10;
+		inputBpn.at<double>(0, 4) = meanDefects/100;
+		inputBpn.at<double>(0, 5) = defectSize / 100;		
 		getBpnValue(inputBpn, output);
 		vector<int> binairoutput;
 		for (int i = 0; i < output.rows; i++) {

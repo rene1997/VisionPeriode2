@@ -29,6 +29,7 @@ struct classData {
 	double meanValueDefects;
 	double aspectRatio;
 	double centerPoint;
+	double defectSize;
 	int expectedValue;
 };
 

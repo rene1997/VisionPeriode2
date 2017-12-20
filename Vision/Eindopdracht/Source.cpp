@@ -48,21 +48,21 @@ int main() {
 		if(key == 'q')
 		{
 			int test = pictureData.size();
-			Mat trainingSet = (Mat_<double>(pictureData.size(), 5));
+			Mat trainingSet = (Mat_<double>(pictureData.size(), 7));
 			Mat expectedSet = (Mat_<double>(pictureData.size(), 4));
 			for (int i = 0; i<pictureData.size(); i++)
 			{
 				//int index = i * trainingSet.cols;
 				//trainingSet[index] = pictureData[i].area;
-				//trainingSet.at<double>(i, 0) = (double)pictureData[i].area;
-				trainingSet.at<double>(i, 0) = (double)pictureData[i].contour.size()/1000;
+				trainingSet.at<double>(i, 0) = (double)pictureData[i].area;
+				trainingSet.at<double>(i, 1) = (double)pictureData[i].contour.size()/100;
 				//trainingSet.at<double>(i, 2) = (double)pictureData[i].energy/100;
-				trainingSet.at<double>(i, 1) = pictureData[i].numberOfHoles;
-				trainingSet.at<double>(i, 2) = pictureData[i].amountOfDefects;
-				trainingSet.at<double>(i, 3) = pictureData[i].meanValueDefects;
-				trainingSet.at<double>(i, 4) = pictureData[i].defectSize;
-				//trainingSet.at<double>(i, 5) = pictureData[i].aspectRatio;
-				//trainingSet.at<double>(i, 6) = pictureData[i].centerPoint;
+				trainingSet.at<double>(i, 2) = pictureData[i].numberOfHoles;
+				trainingSet.at<double>(i, 3) = pictureData[i].amountOfDefects;
+				trainingSet.at<double>(i, 4) = pictureData[i].meanValueDefects;
+				trainingSet.at<double>(i, 5) = pictureData[i].defectSize;
+				//trainingSet.at<double>(i, 7) = pictureData[i].aspectRatio;
+				trainingSet.at<double>(i, 6) = pictureData[i].centerPoint;
 				string x = convert(pictureData[i].expectedValue);
 				expectedSet.at<double>(i, 0) = x[0] - '0';
 				expectedSet.at<double>(i, 1) = x[1] - '0';

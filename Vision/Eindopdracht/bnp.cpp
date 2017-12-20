@@ -103,12 +103,12 @@ void bnp(Mat_<double> ITset, Mat_<double> OTset)
 			V0 = V1;
 			W0 = W1;
 		}
-		cout << "sumSqrDiffError = " << sumSqrDiffError << endl;
+		//cout << "sumSqrDiffError = " << sumSqrDiffError << endl;
 		runs++;
-		/*if (runs >= 27000)
+		if (runs %100 ==0)
 		{
 			cout << "sumSqrDiffError = " << sumSqrDiffError << endl;
-		}*/
+		}
 	}
 	cout << "sumSqrDiffError = " << sumSqrDiffError << endl;
 

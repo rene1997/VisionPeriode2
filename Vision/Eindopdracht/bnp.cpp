@@ -18,7 +18,7 @@ using namespace std;
 const double MAX_OUTPUT_ERROR = 1E-10;
 
 // maximaal aantal runs dat uitgevoerd wordt bij het trainen
-const int MAXRUNS = 10000;
+const int MAXRUNS = 30000;
 
 
 bool isloaded = false;
@@ -110,7 +110,12 @@ void bnp(Mat_<double> ITset, Mat_<double> OTset)
 		}
 		cout << "sumSqrDiffError = " << sumSqrDiffError << endl;
 		runs++;
+		/*if (runs >= 27000)
+		{
+			cout << "sumSqrDiffError = " << sumSqrDiffError << endl;
+		}*/
 	}
+	cout << "sumSqrDiffError = " << sumSqrDiffError << endl;
 
 	cout << "BPN Training is ready!" << endl << endl;
 	cout << "Runs = " << runs << endl << endl;

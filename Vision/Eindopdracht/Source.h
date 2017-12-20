@@ -31,6 +31,7 @@ struct classData {
 	double centerPoint;
 	double defectSize;
 	int expectedValue;
+	Point startPoint;
 };
 
 

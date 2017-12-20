@@ -16,11 +16,13 @@
 #include <iostream>
 #include <string>
 #include "FileIO.h"
+#include <math.h>  
 
 using namespace cv;
 using namespace std;
 
 void bnp(Mat_<double>, Mat_<double>);
+void getBpnValue(Mat_<double> input, Mat_<double> & output);
 
 // remark: a function call with a Mat-object parameter is a call by reference
 

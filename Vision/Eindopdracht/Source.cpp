@@ -11,7 +11,7 @@ int main() {
 	loadCalibration();
 	
 	Mat image, gray_image, correctImage;
-	VideoCapture capture = VideoCapture(1);
+	VideoCapture capture = VideoCapture(0);
 	while (1) {
 		capture >> image;
 		fixFrame(image, correctImage);
@@ -49,7 +49,7 @@ int main() {
 				//int index = i * trainingSet.cols;
 				//trainingSet[index] = pictureData[i].area;
 				trainingSet.at<double>(i, 0) = (double)pictureData[i].area;
-				trainingSet.at<double>(i, 1) = (double)pictureData[i].contour.size()/100;
+				trainingSet.at<double>(i, 1) = (double)pictureData[i].contourSize;
 				//trainingSet.at<double>(i, 2) = (double)pictureData[i].energy/100;
 				trainingSet.at<double>(i, 2) = pictureData[i].numberOfHoles;
 				trainingSet.at<double>(i, 3) = pictureData[i].amountOfDefects;
@@ -147,6 +147,7 @@ void determineClass(Mat gray_image, vector<classData>& classes)
 	vector< Vec4i > hierarchy2;
 	vector<Mat> singleMats;
 	findContours(treshold_image, contourVector, hierarchy2, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+	//filter contours:
 	for (int i = contourVector.size() - 1; i >= 0; i--) {
 		if (hierarchy2[i][3] != -1)
 			contourVector.erase(contourVector.begin() + i);
@@ -156,74 +157,24 @@ void determineClass(Mat gray_image, vector<classData>& classes)
 	for (int i = 0; i < contourVector.size(); i++)
 	{
 		vector<Point> gridContour;
-		vector < vector<Point>> contours;
-		vector< Vec4i > hierarchy;
-		int numberOfHoles = 0;
 		makeGrid(contourVector[i], gridContour);
+
+		double numberOfHoles, contourSize;
+		getNumberOfHoles(singleMats[i], contourSize, numberOfHoles);
+
 		int energy = bendingEnergy(gridContour);
-		imwrite("dstfsd.bmp", singleMats[i]);
-
-		//find number of holes
-		findContours(singleMats[i], contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
-
-		vector<int>  hullsI(gridContour.size()); // Indices to contour points
-		vector<Vec4i> defects;
-		convexHull(gridContour, hullsI, false);
-		convexityDefects(gridContour, hullsI, defects);
-		double amountOfDefects = 0;
-		double meanDefects = 0;
-		double defectSize = 0;
-		for (const Vec4i& v : defects)
-		{
-			float depth = v[3] / 500;
-			if (depth > 1) //  filter defects by depth, e.g more than 10
-			{
-				defectSize += abs(v[1] - v[0]);
-				amountOfDefects++;
-				meanDefects += depth;
-			}
-		}
 		
-		if (amountOfDefects != 0)
-			meanDefects = meanDefects / amountOfDefects;
-
-		//RotatedRect rect =  fitEllipse(contours[0]);
-		RotatedRect rect = minAreaRect(contours[0]);
-		double width = rect.size.width;
-		double height = rect.size.height;
-		double centerX = rect.center.x;
-		double centerY = rect.center.y;
-
-		double  aspectratio = width / height;
-		if (aspectratio > 1)
-			aspectratio = height / width;
-		double centerPoint = (centerX * centerY);
-
-		//1double extent = contourArea(contours[0]) / rect.size();
-
-		for (int j = 0; j< contours.size(); j++) // iterate through each contour.
-		{
-			if (hierarchy[j][3] != -1) {
-				numberOfHoles++;
-			}
-				
-		}
-		//trainingSet.at<double>(i, 0) = (double)pictureData[i].contour.size() / 1000;
-		////trainingSet.at<double>(i, 2) = (double)pictureData[i].energy/100;
-		//trainingSet.at<double>(i, 1) = pictureData[i].numberOfHoles;
-		//trainingSet.at<double>(i, 2) = pictureData[i].amountOfDefects;
-		//trainingSet.at<double>(i, 3) = pictureData[i].meanValueDefects;
-		//trainingSet.at<double>(i, 4) = pictureData[i].defectSize;
-
+		double amountOfDefects = 0, meanDefects = 0, defectSize = 0;
+		findAmountOfDefects(gridContour, amountOfDefects, meanDefects, defectSize);
 
 		Mat inputBpn(Mat_<double>(1, 6));
 		Mat_<double> output;
-		inputBpn.at<double>(0, 0) = (double)areaVec.size() / 1000;
-		inputBpn.at<double>(0, 1) = (double)contours[0].size()/100;
+		inputBpn.at<double>(0, 0) = (double)areaVec.size() / 1000; 
+		inputBpn.at<double>(0, 1) = contourSize;
 		inputBpn.at<double>(0, 2) = numberOfHoles/10;
-		inputBpn.at<double>(0, 3) = amountOfDefects/10;
-		inputBpn.at<double>(0, 4) = meanDefects/100;
-		inputBpn.at<double>(0, 5) = defectSize / 100;		
+		inputBpn.at<double>(0, 3) = amountOfDefects;
+		inputBpn.at<double>(0, 4) = meanDefects;
+		inputBpn.at<double>(0, 5) = defectSize;		
 		getBpnValue(inputBpn, output);
 		vector<int> binairoutput;
 		for (int i = 0; i < output.rows; i++) {
@@ -267,60 +218,19 @@ void trainNeuralNetwork(Mat image, int objectClass) {
 	//for each contour get energy feature
 	for (int i = 0; i < contourVector.size(); i ++) {
 		vector<Point> gridContour;
-		vector < vector<Point>> contours;
-		vector< Vec4i > hierarchy;
-		int numberOfHoles = 0;
 		makeGrid(contourVector[i], gridContour);
+
+		double numberOfHoles, contourSize;
+		getNumberOfHoles(singleMat[i], contourSize, numberOfHoles);
+
 		int energy = bendingEnergy(gridContour);
-		imwrite("dstfsd.bmp", singleMat[i]);
-		
-		//find number of holes
-		findContours(singleMat[i], contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
-		//vector<vector<Point>> c;
 
-		//findContours(gray_image, c, RETR_EXTERNAL, 0);
-		//findContours(gray_image, c, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-		//cout << "freeman test " << c[0] << endl;
+		double amountOfDefects = 0, meanDefects = 0, defectSize = 0;
+		findAmountOfDefects(gridContour, amountOfDefects, meanDefects, defectSize);
 
-		vector<int>  hullsI(gridContour.size()); // Indices to contour points
-		vector<Vec4i> defects;
-		convexHull(gridContour, hullsI, false);
-		convexityDefects(gridContour, hullsI, defects);
-		double amountOfDefects = 0;
-		double meanDefects = 0;
-		double defectSize = 0;
-		for (const Vec4i& v : defects)
-		{
-			float depth = v[3] / 500;
-			if (depth > 1) //  filter defects by depth, e.g more than 10
-			{
-				defectSize += abs(v[1] - v[0]);
-				amountOfDefects++;
-				meanDefects += depth;
-			}
-		}
-		if(amountOfDefects !=0)
-			meanDefects = meanDefects / amountOfDefects;
-		
-		//RotatedRect rect =  fitEllipse(contours[0]);
-		RotatedRect rect = minAreaRect(contours[0]);
-		double width = rect.size.width;
-		double height = rect.size.height;
-		double centerX = rect.center.x;
-		double centerY = rect.center.y;
+		double aspectRatio = 0, centerPoint = 0;
 
-		double  aspectratio = (width / height) /10;
-		double centerPoint = (centerX * centerY);
-
-		
-
-
-		for (int j = 0; j< contours.size(); j++) // iterate through each contour.
-		{
-			if (hierarchy[j][3] != -1)
-				numberOfHoles++;
-		}
-		pictureData.push_back({ contours[0],(double)energy/100,(double)areaVec[i]/1000,(double)numberOfHoles/10,(double)amountOfDefects/10,meanDefects/100, aspectratio , centerPoint/1000, defectSize/100});
+		pictureData.push_back({ contourSize,(double)energy/100,(double)areaVec[i]/1000,(double)numberOfHoles/10,(double)amountOfDefects/10,meanDefects/100, aspectRatio , centerPoint/1000, defectSize/100});
 	}
 
 	//get class number

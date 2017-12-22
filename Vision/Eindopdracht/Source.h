@@ -22,7 +22,7 @@ using namespace cv;
 using namespace std;
 
 struct classData {
-	vector<Point> contour;
+	double contourSize;
 	double energy;
 	double area;
 	double numberOfHoles;

@@ -133,3 +133,62 @@ double bendingEnergy(vector<Point> & contourvec) {
 	}
 	return energy;
 }
+
+void findAmountOfDefects(vector<Point> contour, double & amountOfDefects, double meanDefects, double & defectSize)
+{
+	vector<int>  hullsI(contour.size()); // Indices to contour points
+	vector<Vec4i> defects;
+	convexHull(contour, hullsI, false);
+	convexityDefects(contour, hullsI, defects);
+	amountOfDefects = 0;
+	meanDefects = 0;
+	defectSize = 0;
+	for (const Vec4i& v : defects)
+	{
+		float depth = v[3] / 500;
+		if (depth > 1) //  filter defects by depth, e.g more than 10
+		{
+			defectSize += abs(v[1] - v[0]);
+			amountOfDefects++;
+			meanDefects += depth;
+		}
+	}
+
+	if (amountOfDefects != 0)
+		meanDefects = meanDefects / amountOfDefects;
+	amountOfDefects * amountOfDefects / 10;
+	meanDefects = meanDefects / 100;
+	defectSize = defectSize / 100;
+}
+
+void getAspectRatio(vector<Point> contour, double& aspectratio, double & centerPoint)
+{
+	RotatedRect rect = minAreaRect(contour);
+	double width = rect.size.width;
+	double height = rect.size.height;
+	double centerX = rect.center.x;
+	double centerY = rect.center.y;
+
+	aspectratio = width / height;
+	if (aspectratio > 1)
+		aspectratio = height / width;
+	centerPoint = (centerX * centerY);
+	centerPoint = centerPoint / 100;
+}
+
+void getNumberOfHoles(Mat roi, double & contourSize, double & numberOfHoles)
+{
+	vector < vector<Point>> contours;
+	vector< Vec4i > hierarchy;
+	numberOfHoles = 0;
+	findContours(roi, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+
+	for (int j = 0; j < contours.size(); j++) // iterate through each contour.
+	{
+		if (hierarchy[j][3] != -1) {
+			numberOfHoles++;
+		}
+	}
+	numberOfHoles = numberOfHoles / 10;
+	contourSize = contours[0].size() / 100;
+}

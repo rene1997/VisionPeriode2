@@ -1,2 +1,2 @@
 # VisionPeriode2
-Vision opdrachten periode 2
+Vision programma om getallen te detecteren onder een camera. Dit wordt gedaan met behulp van een neuraal netwerk.
